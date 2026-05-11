@@ -49,10 +49,9 @@ model <- glm(
   family = binomial(link = "logit")
 )
 
-# Coefficient summary (log-odds scale)
 summary(model)
 
-# Tidy output
+
 tidy(model, conf.int = TRUE, conf.level = 0.95) |> print()
 
 
@@ -105,9 +104,7 @@ hl <- hoslem.test(
 
 cat("\nHosmer-Lemeshow test:\n")
 print(hl)
-# p > 0.05 → acceptable fit
 
-# --- Deviance and AIC ----------------------------------------
 cat("\nNull deviance   :", model$null.deviance,  "df =", model$df.null)
 cat("\nResidual deviance:", model$deviance,       "df =", model$df.residual)
 cat("\nAIC             :", AIC(model), "\n")
