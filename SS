@@ -1,0 +1,72 @@
+treat<-factor(rep(paste0("Diet_",1:6),c(6,7,8,6,8,5)))
+d1<-c(179,186,200,182,187,197)
+d2<-c(169,188,179,189,186,168,182)
+d3<-c(182,191,243,214,213,202,180,214)
+d4<-c(202,220,226,245,241,225)
+d5<-c(210,214,220,192,188,189,190,224)
+d6<-c(155,176,159,161,165)
+diet<-c(d1,d2,d3,d4,d5,d6)
+data<-data.frame(Treatment=treat, Weight=diet)
+model<-aov(Weight~Treatment, data=data)
+summary(model)
+a. There is a significant difference between the diets or treatments.
+con<-c(0,0,1,0,-1,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con)
+ Estimate Std. Error t value Pr(>|t|)
+b. The mean weights of chickens given diets 3 and 5 are equivalent.
+con<-c(0,0,1,0,0,-1)
+library(gmodels)
+fit.contrast(model,"Treatment",con)
+ Estimate Std. Error t value Pr(>|t|)
+c. There is a significant difference between the mean weights of chickens fed diets 3
+and 6.
+library(agricolae)
+LSD.test(model,"Treatment") $group
+There is a significant difference between the mean weights of chickens fed diets
+4 vs 3, 4 vs 5, 4 vs 1, 4 vs 2, 4 vs 6, 3 vs 1, 3 vs 2, 3 vs 6, 5 vs 2, 5 vs 6, 1 vs 6,
+2 vs 6.
+
+##2
+blck<-factor(rep(paste0("Block_",1:5),each=6))
+treat<-factor(rep(LETTERS[1:6],times=5))
+b1<-c(33.5,38.9,40.9,41.9,41.9,42.8)
+b2<-c(33,37.8,39.6,40.4,40.5,41.9)
+b3<-c(32,37,39,39.9,39.8,40.7)
+b4<-c(30,36,38.3,39.5,39.2,39.8)
+b5<-c(28.5,34.8,37.5,38.7,38.8,39.4)
+yld<-c(b1,b2,b3,b4,b5)
+data<-data.frame(Block=blck,Treatment=treat,Yield=yld)
+model<-aov(Yield~Block+Treatment, data=data)
+summary(model)
+a. There is a significant difference between the treatments.
+con<-c(0,0,0,1,-1,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con)
+b
+con<-c(0,1,-1,0,0,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con, conf.int=0.95)
+library(agricolae)
+duncan.test(model,"Treatment")$group
+LSD.test(model,"Treatment")$group
+d. There is no difference between the mean sugar beetroot types or treatments D vs E
+and all others treatment pairs has significant difference.
+e. There is a significant difference between the blocks because from (a) we have pvalue for blocks (5.04e-11 ***).
+f. Yes, blocking is necessary in this experiment.
+
+###3
+row<-factor(rep(paste0("Cow-",1:4),each=4))
+col<-factor(rep(paste0("Period-",1:4),4))
+treat<-factor(paste0("Treat-",c(1:4,2,4,1,3,3,1,4,2,4,3,2,1)))
+r1<-c(192,190,214,221)
+r2<-c(195,203,139,152)
+r3<-c(292,218,245,204)
+r4<-c(249,210,163,134)
+r<-c(r1,r2,r3,r4)
+data<-data.frame(Row=row,Column=col,Treatment=treat,Milk=r)
+model<-aov(Milk~Row+Column+Treatment, data=data)
+summary(model)
+a. There is a significant difference between the diets or treatments
+library(agricolae)
+LSD.test(model,"Treatment")$group
