@@ -1,3 +1,101 @@
+#1.Graphically drawing the lines;
+x<-seq(0,400,1)
+yc<-(34000-100*x)/100
+yd<-(36000-200*x)/300
+yl<-(32000-200*x)/200
+plot(x, yc, type="n",xlab="x",ylab="y",
+     xlim=c(0,400), ylim=c(0,400))
+lines(x,yc,col="red")
+lines(x,yd,col="blue")
+lines(x,yl,col="green")
+
+The corner points are: (0, 120), (160, 0), (120, 40).
+Calculating the objective value for all corner points;
+
+df<-data.frame(x=c(0,160,120),y=c(120,0,40))
+df$z<-100*df$x+120*df$y
+opt<-which.max(df$z)
+xy<-df[opt,]
+xy
+
+#2 simplex method
+
+library(lpSolve)
+obj<-c(1,1,-4)
+const.mat<-matrix(c(1,1,2,1,1,-1,-1,1,1),nrow = 3,byrow = TRUE)
+const.dir<-c("<=","<=","<=")
+const.rhs<-c(8,2,4)
+sol<-lp("min",obj,const.mat,const.dir,const.rhs)
+cat("Z=",sol$objval,"\n")
+cat("(x1, x2,x3):",sol$sol[1:3],"\n")
+
+
+# dual simplex method (To solve the given LPP by dual simplex method we have to maximize the
+objective function and have to change the constraint into less than or equal.
+)
+library(lpSolve)
+obj<-c(-5,-6)
+const.mat<-matrix(c(-1,-1,-4,-1),nrow = 2,byrow = TRUE)
+const.dir<-c("<=","<=")
+const.rhs<-c(-2,-4)
+sol<-lp("max",obj,const.mat,const.dir,const.rhs)
+cat("Z=",sol$objval,"\n")
+cat("(x1, x2):",sol$sol[1:2],"\n")
+
+#Big-M method(To solve the given LPP by Big-M method, we write the given LPP introducing slack, surplus and artificial variables)
+
+library(lpSolve)
+M<-1e10
+obj<-c(3,2,0,0,0,M,M)
+const.mat<-matrix(c(2,1,0,-1,0,1,0,-3,2,1,0,0,0,0,1,1,0,0,-1,0,1),nrow = 3,byrow = TRUE)
+const.dir<-c("=","=","=")
+const.rhs<-c(10,6,6)
+sol<-lp("min",obj,const.mat,const.dir,const.rhs)
+cat("Z=",sol$objval,"\n")
+cat("Opt Values (x1, x2):",sol$sol[1:2],"\n")
+
+# two-phase method()
+#p1
+library(lpSolve)
+obj1<-c(0,0,0,0,1,1)
+const1<-matrix(c(2,1,1,1,3,1,1,0,0,0,-1,0,0,1,0,0,0,1),nrow=3)
+dir1<-c("=","=","=")
+rhs1<-c(16,36,10)
+phase1<-lp(
+  direction="min",
+  objective.in=obj1,
+  const.mat=const1,
+  const.dir=dir1,
+  const.rhs=rhs1)
+cat("the optimal value =",phase1$objval,"\n")
+
+cat("The values of the artificial variables are:","\n",
+    "a1=",phase1$solution[5]," and ","a2=",phase1$solution[6],"\n")
+#p2
+if (phase1$objval == 0) {
+  obj.phase2 <- c(2, 3, 0, 0, 0, 0)
+  phase2 <- lp("min", obj.phase2, const.mat, const.dir, const.rhs)
+  cat("\nPhase 2 (original objective):\n")
+  cat("Optimal value of Z:", phase2$objval, "\n")
+  cat("Values of x1, x2:", phase2$solution[1:2], "\n")
+} else {
+  cat("Problem is infeasible (Phase 1 > 0)\n")
+}
+
+
+#transportation
+
+library(lpSolve)
+m<-matrix(c(),nrow=3,byrow=T)
+a<-c("<","<","<")
+b<-c()
+c<-c(">",">",">",">")
+d<-c()
+sol<-lp.transport(m,"min",a,b,c,d)
+sol
+sol$solution
+
+#####bio#####
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(
