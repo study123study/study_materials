@@ -1,8 +1,8 @@
 #1.Graphically drawing the lines;
 x<-seq(0,400,1)
-yc<-(34000-100*x)/100
-yd<-(36000-200*x)/300
-yl<-(32000-200*x)/200
+yc<-
+yd<-
+yl<-
 plot(x, yc, type="n",xlab="x",ylab="y",
      xlim=c(0,400), ylim=c(0,400))
 lines(x,yc,col="red")
@@ -21,10 +21,10 @@ xy
 #2 simplex method
 
 library(lpSolve)
-obj<-c(1,1,-4)
-const.mat<-matrix(c(1,1,2,1,1,-1,-1,1,1),nrow = 3,byrow = TRUE)
+obj<-c()
+const.mat<-matrix(c(),nrow = 3,byrow = TRUE)
 const.dir<-c("<=","<=","<=")
-const.rhs<-c(8,2,4)
+const.rhs<-c()
 sol<-lp("min",obj,const.mat,const.dir,const.rhs)
 cat("Z=",sol$objval,"\n")
 cat("(x1, x2,x3):",sol$sol[1:3],"\n")
@@ -34,8 +34,8 @@ cat("(x1, x2,x3):",sol$sol[1:3],"\n")
 objective function and have to change the constraint into less than or equal.
 )
 library(lpSolve)
-obj<-c(-5,-6)
-const.mat<-matrix(c(-1,-1,-4,-1),nrow = 2,byrow = TRUE)
+obj<-c()
+const.mat<-matrix(c(),nrow = 2,byrow = TRUE)
 const.dir<-c("<=","<=")
 const.rhs<-c(-2,-4)
 sol<-lp("max",obj,const.mat,const.dir,const.rhs)
@@ -94,6 +94,104 @@ d<-c()
 sol<-lp.transport(m,"min",a,b,c,d)
 sol
 sol$solution
+
+#NCWR and VAM
+# Define the cost matrix
+costs <- matrix(c(4, 8, 8,
+                  16, 24, 16,
+                  8, 16, 24),
+                nrow = 3, byrow = TRUE)
+supply <- c(76, 82, 77)
+demand <- c(72, 102, 41)
+# Function for North-West Corner Rule
+north_west_corner <- function(supply, demand) {
+  m <- length(supply)
+  n <- length(demand)
+  allocation <- matrix(0, m, n)
+  
+  i <- 1
+  j <- 1
+  while (i <= m & j <= n) {
+    alloc <- min(supply[i], demand[j])
+    allocation[i, j] <- alloc
+    supply[i] <- supply[i] - alloc
+    demand[j] <- demand[j] - alloc
+    
+if (supply[i] == 0) {
+      i <- i + 1
+    } else {
+      j <- j + 1
+    }
+  }
+  return(allocation)
+}
+# Run NWCR
+nwcr_result <- north_west_corner(supply, demand)
+cat("North-West Corner Rule Allocation:\n")
+print(nwcr_result)
+
+# Function for Vogel’s Approximation Method (VAM)
+vogel_approximation <- function(costs, supply, demand) {
+  m <- nrow(costs)
+  n <- ncol(costs)
+  allocation <- matrix(0, m, n)
+  supply_left <- supply
+  demand_left <- demand
+  cost_matrix <- costs
+  
+  while (any(supply_left > 0) && any(demand_left > 0)) {
+    penalty <- rep(0, m + n)
+    
+    # Calculate row penalties
+for (i in 1:m) {
+      if (supply_left[i] > 0) {
+        row <- cost_matrix[i, demand_left > 0]
+        if (length(row) >= 2) {
+          penalty[i] <- sort(row)[2] - sort(row)[1]
+        } else if (length(row) == 1) {
+          penalty[i] <- row
+        }
+      }
+    }
+    
+    # Calculate column penalties
+for (j in 1:n) {
+      if (demand_left[j] > 0) {
+        col <- cost_matrix[supply_left > 0, j]
+        if (length(col) >= 2) {
+          penalty[m + j] <- sort(col)[2] - sort(col)[1]
+        } else if (length(col) == 1) {
+          penalty[m + j] <- col
+        }
+      }
+    }
+    
+    # Find max penalty
+idx <- which.max(penalty)
+    
+if (idx <= m) {
+      # Row penalty selected
+i <- idx
+      available_cols <- which(demand_left > 0)
+      j <- available_cols[which.min(cost_matrix[i, available_cols])]
+    } else {
+      # Column penalty selected
+      j <- idx - m
+      available_rows <- which(supply_left > 0)
+      i <- available_rows[which.min(cost_matrix[available_rows, j])]
+    }
+    
+alloc <- min(supply_left[i], demand_left[j])
+    allocation[i, j] <- alloc
+    supply_left[i] <- supply_left[i] - alloc
+    demand_left[j] <- demand_left[j] - alloc
+  }
+  return(allocation)
+}
+# Run VAM
+vam_result <- vogel_approximation(costs, supply, demand)
+cat("\nVogel’s Approximation Method Allocation:\n")
+print(vam_result)
 
 #####bio#####
 
