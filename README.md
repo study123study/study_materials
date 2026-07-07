@@ -211,7 +211,7 @@ VAM <- function(c,s,d){
   }
   a
 }
-VAM(cost,sup,dem) make it shortest R code
+VAM(cost,sup,dem)
 
 
 
