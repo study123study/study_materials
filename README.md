@@ -298,14 +298,17 @@ ggsurvplot(sp_survival_sex,
            conf.int = FALSE,
            xlab = "Days to follow-up")
 
-The Kaplan-Meier curves show that females have consistently lower survival probabilities than males throughout the follow-up period, with a log-rank p-value <
-0.0001 confirming a statistically significant difference
+
+
+
+cat("The Kaplan-Meier curves show that females have consistently lower survival probabilities than males throughout the follow-up period, with a log-rank p-value <
+0.0001 confirming a statistically significant difference")
 
 
 
 
 
-# ex Log-rank test for group comparison
+#f Log-rank test for group comparison
 logrank_test <- survdiff(
   Surv(Time, Censor) ~ marital,
   data = SP
@@ -314,7 +317,7 @@ logrank_test <- survdiff(
 print(logrank_test)
 
 
-#Comparison with Nelson-Aalen estimate at timepoints 90, 180, 270, 365 days
+#f Comparison with Nelson-Aalen estimate at timepoints 90, 180, 270, 365 days
 
 
 sp_km <-survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", 
@@ -366,12 +369,11 @@ data.frame(
 #HT
 setwd("G:/STATISTICS/4rth Year/2nd Semester/lab")
 HT <- read.csv("Hypertension_Lab.csv",header = T, sep = ",")
+
+#a
 HT$age<-HT$ID/HT$bmi
 
-sum(is.na(HT))
-# 2) Re-coding variables:
-str(HT)
-
+#c factorize
 HT <- within(HT,{
   bmi_cat <- factor(ifelse(bmi<25, "Normal", 
                            ifelse(bmi<30, "Overweight", "Obese")),
@@ -388,23 +390,6 @@ t <- table(HT$sex, HT$ht)
 t
 
 round(prop.table(t),4)
-
-#e Risk of hypertension for male:
-t
-
-risk <- t[1,2]/(t[1,1]+t[1,2])
-risk 
-
-# 95% CI for the risk:
-
-risk+c(-1,1)*qnorm(0.975)*sqrt(risk*(1-risk)/(t[1,1]+t[1,2]))
-
-
-
-
-
-
-
 
 
 #f Association between the hypertension and bmi category:
@@ -438,9 +423,6 @@ increases the odds of hypertension by approximately 11%.
 After adjusting for BMI and gender, each additional hour of sleep decreases the
 odds of hypertension by about 1.4%.
 
-#j Deviance of the model:
-cat("\nNull Devience:",mod$null.deviance,
-    "\nResidual Devience:", mod$deviance)
 
 #k Calculate the sensitivity, recall, specificity, PPV, precision, NPV, F1 score and accuracy level of the test and interpret:
 pp <- predict(mod, type = "response")
@@ -480,37 +462,23 @@ calc_mat <- function(TP,TN,FP,FN){
 
 calc_mat(TP,TN,FP,FN)
 
+
+
+
+
+
+
+
+
+
+
+
 cat("\nSensitivity (24.79%) / Recall: Only 24.79% of hypertensive individuals were correctly identified.
 Specificity (93.20%): 93.20% of non-hypertensive individuals were correctly identified.
 PPV / Precision (64.52%): Among those predicted to have hypertension, 64.52% actually had hypertension.
 NPV (71.29%): Among those predicted to be non-hypertensive, 71.29% were truly non-hypertensive.
 F1 Score (35.82%): Indicates poor overall performance in detecting hypertension.
 Accuracy (70.43%): The model correctly classified 70.43% of individuals.")
-
-#i Multicollinearity by variance inflation factor
-library(car)
-vif(mod)
-
-#m Hosmer-Lemeshow goodness of fit:
-
-# H0: The model is a good fit
-# H1: the model is not a good fit.
-
-library(ResourceSelection)
-hoslem.test(x = as.numeric(HT$ht)-1,
-            y = fitted(mod),
-            g=10)
-
-# Since p value>0.05,do not reject. hence it's a good fit.
-
-
-#n McFadden's pseudo-R2:
-mcfad <- 1-mod$deviance/mod$null.deviance
-mcfad
-
-cat("\nThe model explains",round(mcfad,4)*100,"percent of the variation in the response variable.
-    \nIt's a poor fit.")
-
 
 #op ROC/AUC curve:
 library(pROC)
@@ -519,11 +487,24 @@ roc_obj <- roc(response = HT$ht,
                predict = fitted(mod),
                levels = c("No","Yes"))
 auc(roc_obj)
+
+
+
+
+
+
+
+
 cat("\nApproximately 68.5% probability that the model assigns a higher predicted
 probability of hypertension to a randomly selected hypertensive individual than to
 a randomly selected non-hypertensive individual.")
 
 plot(roc_obj, print.auc=TRUE)
+
+
+
+
+
 
 cat("\nIf we randomly pick one positive case and one negative case then the model will assign higher probablity to 
     the positive case about",round(auc(roc_obj),4)*100,"percent of the time.")
@@ -549,7 +530,55 @@ lower probability of hypertension than males.
 Holding other variables constant, an additional hour of sleep decreases the
 probability of hypertension by approximately 0.29 percentage points on average.")
 
-.
+
+
+
+#################################
+sum(is.na(HT))
+# 2)b Re-coding variables:
+str(HT)
+at <- ifelse(HT$bmi < 25, "Normal",
+             ifelse(HT$bmi < 30, "Overweight","Obese"))
+#e Risk of hypertension for male:
+t
+
+risk <- t[1,2]/(t[1,1]+t[1,2])
+risk 
+
+# 95% CI for the risk:
+
+risk+c(-1,1)*qnorm(0.975)*sqrt(risk*(1-risk)/(t[1,1]+t[1,2]))
+
+
+#j Deviance of the model:
+cat("\nNull Devience:",mod$null.deviance,
+    "\nResidual Devience:", mod$deviance)
+#l Multicollinearity by variance inflation factor
+library(car)
+vif(mod)
+
+#m Hosmer-Lemeshow goodness of fit:
+
+# H0: The model is a good fit
+# H1: the model is not a good fit.
+
+library(ResourceSelection)
+hoslem.test(x = as.numeric(HT$ht)-1,
+            y = fitted(mod),
+            g=10)
+
+# Since p value>0.05,do not reject. hence it's a good fit.
+
+
+#n McFadden's pseudo-R2:
+mcfad <- 1-mod$deviance/mod$null.deviance
+mcfad
+
+cat("\nThe model explains",round(mcfad,4)*100,"percent of the variation in the response variable.
+    \nIt's a poor fit.")
+
+
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Type I censoring 
@@ -631,6 +660,13 @@ df <- data.frame(time, event)
 
 df
 str(df)
+
+mod <- survfit(Surv(time,event)~1,df,type="kaplan-meier",conf.type="log-log")
+mod
+summary(mod)
+
+summary(mod)$n.censor
+
 
 mod <- survfit(Surv(time,event)~1,df,type="kaplan-meier",conf.type="log-log")
 mod
