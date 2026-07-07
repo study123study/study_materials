@@ -180,6 +180,41 @@ vam_result <- vogel_approximation(costs, supply, demand)
 cat("\nVogel’s Approximation Method Allocation:\n")
 print(vam_result)
 
+#or
+cost <- matrix(c(4,8,8,0,16,24,16,0,8,16,24,0),3,4,by=T)
+sup <- c(76,82,77)
+dem <- c(72,102,41,20)
+
+# NWCR
+NWCR <- function(s,d){
+  a <- matrix(0,length(s),length(d)); i <- j <- 1
+  while(i<=length(s) & j<=length(d)){
+    x <- min(s[i],d[j]); a[i,j] <- x
+    s[i] <- s[i]-x; d[j] <- d[j]-x
+    if(s[i]==0) i <- i+1 else j <- j+1
+  }
+  a
+}
+NWCR(sup,dem)
+VAM <- function(c,s,d){
+  m <- nrow(c); n <- ncol(c); a <- matrix(0,m,n)
+  while(any(s>0)&any(d>0)){
+    p <- c(
+      sapply(1:m,\(i) if(s[i]){x<-sort(c[i,d>0]); if(length(x)>1)x[2]-x[1] else x}else 0),
+      sapply(1:n,\(j) if(d[j]){x<-sort(c[s>0,j]); if(length(x)>1)x[2]-x[1] else x}else 0)
+    )
+    k <- which.max(p)
+    if(k<=m){i<-k;j<-which(d>0)[which.min(c[i,d>0])]}
+    else{j<-k-m;i<-which(s>0)[which.min(c[s>0,j])]}
+    x <- min(s[i],d[j]); a[i,j] <- x
+    s[i] <- s[i]-x; d[j] <- d[j]-x
+  }
+  a
+}
+VAM(cost,sup,dem) make it shortest R code
+
+
+
 #transportation
 
 library(lpSolve)
