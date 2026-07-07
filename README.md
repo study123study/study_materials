@@ -1,15 +1,14 @@
 #GRAPHICAL METHOD
 
-x<-seq(0,400,1)
+x<-seq(0,1000,1)
 yc<-
 yd<-
 yl<-
-plot(x,yc, type="n", xlab="x",ylab="y",xlim=c(0,400),ylim=c(0,400))
+plot(x,yc, type="n", xlab="x",ylab="y",xlim=c(0,1000),ylim=c(0,1000))
 lines(x,yc,col="red")
 lines(x,yd, col="blue")
 lines(x,yl,col='yellow')
-The corner points are: (0, 120), (160, 0), (120, 40).
-Calculating the objective value for all corner points;
+#The corner points are: (0, 120), (160, 0), (120, 40)
 df<-data.frame(x=c(0,160,120),y=c(120,00,40))
 df$z<-100*df$x+120*df$y
 opt<-which.max(df$z)
@@ -84,26 +83,13 @@ if (phase1$objval == 0) {
 }
 
 
-#transportation
-
-library(lpSolve)
-m<-matrix(c(),nrow=3,byrow=T)
-a<-c("<","<","<")
-b<-c()
-c<-c(">",">",">",">")
-d<-c()
-sol<-lp.transport(m,"min",a,b,c,d)
-sol
-sol$solution
-
 #NCWR and VAM
-# Define the cost matrix
-costs <- matrix(c(4, 8, 8,
-                  16, 24, 16,
-                  8, 16, 24),
+costs <- matrix(c(4, 8, 8,0,
+                  16, 24, 16,0,
+                  8, 16, 24,0),
                 nrow = 3, byrow = TRUE)
 supply <- c(76, 82, 77)
-demand <- c(72, 102, 41)
+demand <- c(72, 102, 41,20)
 # Function for North-West Corner Rule
 north_west_corner <- function(supply, demand) {
   m <- length(supply)
@@ -193,6 +179,8 @@ vogel_approximation <- function(costs, supply, demand) {
 vam_result <- vogel_approximation(costs, supply, demand)
 cat("\nVogel’s Approximation Method Allocation:\n")
 print(vam_result)
+
+
 
 #####bio#####
 
