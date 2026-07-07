@@ -180,6 +180,17 @@ vam_result <- vogel_approximation(costs, supply, demand)
 cat("\nVogel’s Approximation Method Allocation:\n")
 print(vam_result)
 
+#transportation
+
+library(lpSolve)
+m<-matrix(c(),nrow=3,byrow=T)
+a<-c("<","<","<")
+b<-c()
+c<-c(">",">",">",">")
+d<-c()
+sol<-lp.transport(m,"min",a,b,c,d)
+sol
+sol$solution
 
 
 #####bio#####
