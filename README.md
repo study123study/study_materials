@@ -218,24 +218,33 @@ SP <- within(SP,{
 })
 
 str(SP)
-# Number of censored observations and events for all patients
+# a Number of censored observations and events for all patients
 table(SP$cen)
 prop.table(table(SP$cen))
 
 #(by marital status): 
 table(SP$marital,SP$cen)
 prop.table(table(SP$marital,SP$cen))
+cat("By marital status the number of censors is 50, 35 and 32 for Single, Married and
+Alone again")
+
+
+
+
 
 # (by gender): 
 table(SP$sex,SP$cen)
 prop.table(table(SP$sex,SP$cen))
-
+#b km plot
 library(survival)
 names(SP)
 sp_survival <- survfit(Surv(Time, Censor)~1,
                        data = SP, type = "kaplan-meier",
                        conf.type = "log-log")
+plot(sp_survival, xlab = "Days of follow-up", ylab="Survival Probability", main= "Overall
+survival curve")
 
+#or
 library(survminer)
 ggsurvplot(sp_survival,
            data = SP,
@@ -244,16 +253,13 @@ ggsurvplot(sp_survival,
            surv.median.line = "hv",
            conf.int = FALSE,
            xlab = "Days to follow-up")
-plot(sp_survival,
-     xlab = "Days of follow-up",
-     ylab = "Survival Probability",
-     main = "Overall Survival Curve")
-# median
+
+# c median s(t)
 print(sp_survival)
 # 95% CI
 summary(sp_survival, time = c(6*30,18*30,36*30))
 
-#95% CI by marital status
+#d 95% CI by marital status
 names(SP)
 sp_survival_mar <- survfit(Surv(Time,Censor)~marital, data = SP, type = "kaplan-meier", conf.type = "log-log")
 
@@ -267,12 +273,21 @@ ggsurvplot(sp_survival_mar,
            surv.median.line = "hv",
            conf.int = FALSE,
            xlab = "Days to follow-up")
+cat("\nSince p-value < 0.0001, we conclude that highly significant differences in survival
+times among the three marital status groups. Patients who are 'Alone Again' have the poorest survival (median 539 days), while married patients have the best
+survival (median 1310 days).") 
 
-# The median survival time (with 95% CI) by gender
+
+
+
+
+# e The median survival time (with 95% CI) by gender
 names(SP)
 sp_survival_sex <- survfit(Surv(Time,Censor)~sex, data = SP, type = "kaplan-meier", conf.type = "log-log")
 
 sp_survival_sex 
+cat("Females have a substantially lower median survival time compared to males,
+indicating that females in this cohort have poorer survival outcomes.")
 
 # Kaplan-Meier estimate of the survival curve by gender
 ggsurvplot(sp_survival_sex,
@@ -282,7 +297,15 @@ ggsurvplot(sp_survival_sex,
            surv.median.line = "hv",
            conf.int = FALSE,
            xlab = "Days to follow-up")
-# Log-rank test for group comparison
+
+The Kaplan-Meier curves show that females have consistently lower survival probabilities than males throughout the follow-up period, with a log-rank p-value <
+0.0001 confirming a statistically significant difference
+
+
+
+
+
+# ex Log-rank test for group comparison
 logrank_test <- survdiff(
   Surv(Time, Censor) ~ marital,
   data = SP
@@ -305,7 +328,7 @@ sum_na <- summary(sp_na, times = c(90, 180, 270, 365))
 data.frame(
   Time = sum_km$time,
   At_risk = sum_km$n.risk,
-  Events = sum_km$n.event,
+   Events = sum_km$n.event,
   Censor = sum_km$n.censor,
   Skm =sum_km$surv,
   km_lower = sum_km$lower,
@@ -345,6 +368,7 @@ setwd("G:/STATISTICS/4rth Year/2nd Semester/lab")
 HT <- read.csv("Hypertension_Lab.csv",header = T, sep = ",")
 HT$age<-HT$ID/HT$bmi
 
+sum(is.na(HT))
 # 2) Re-coding variables:
 str(HT)
 
@@ -359,13 +383,13 @@ HT <- within(HT,{
 str(HT)
 
 
-# Table and proportion table of gender:
+#d Table and proportion table of gender:
 t <- table(HT$sex, HT$ht)
 t
 
 round(prop.table(t),4)
 
-# Risk of hypertension for male:
+#e Risk of hypertension for male:
 t
 
 risk <- t[1,2]/(t[1,1]+t[1,2])
@@ -376,29 +400,49 @@ risk
 risk+c(-1,1)*qnorm(0.975)*sqrt(risk*(1-risk)/(t[1,1]+t[1,2]))
 
 
-# Association between the hypertension and bmi category:
+
+
+
+
+
+
+
+#f Association between the hypertension and bmi category:
 t2 <- table(HT$bmi_cat, HT$ht)
 
-chisq.test(t2)   # Since p-value = 1.011e-14 <0.001, there is a significant association.
+chisq.test(t2)                                                                    # Since p-value = 1.011e-14 <0.001, there is a significant association.
 
 # Highest probability of hypertension
 
-round(prop.table(t2,2),4)*100 # 2 means column wise percentage, so the category which has higher percentage for ht has the highest probability. 
+round(prop.table(t2,2),4)*100 
+cat("Obese bmi category has the highest probability of hypertension.")
 
-
-# Fit a logistic regression model to predict hypertension, using bmi, sleep, gender:
+#g Fit a logistic regression model to predict hypertension, using bmi, sleep, gender:
 
 mod <- glm(ht ~ bmi + sex + sleep, data = HT, family = binomial(link = "logit"))
 summary(mod)
 
+
+
+
+
+
+
+
+#h,i
 library(broom)
 tidy(mod, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
 
-# Deviance of the model:
+Holding sleep duration and gender constant, each one-unit increase in BMI
+increases the odds of hypertension by approximately 11%.
+After adjusting for BMI and gender, each additional hour of sleep decreases the
+odds of hypertension by about 1.4%.
+
+#j Deviance of the model:
 cat("\nNull Devience:",mod$null.deviance,
     "\nResidual Devience:", mod$deviance)
 
-# Calculate the sensitivity, recall, specificity, PPV, precision, NPV, F1 score and accuracy level of the test and interpret:
+#k Calculate the sensitivity, recall, specificity, PPV, precision, NPV, F1 score and accuracy level of the test and interpret:
 pp <- predict(mod, type = "response")
 pv <- factor(ifelse(pp>0.5, 1, 0), labels = c("No", "Yes"))
 
@@ -443,11 +487,11 @@ NPV (71.29%): Among those predicted to be non-hypertensive, 71.29% were truly no
 F1 Score (35.82%): Indicates poor overall performance in detecting hypertension.
 Accuracy (70.43%): The model correctly classified 70.43% of individuals.")
 
-# Multicollinearity by variance inflation factor
+#i Multicollinearity by variance inflation factor
 library(car)
 vif(mod)
 
-# Hosmer-Lemeshow goodness of fit:
+#m Hosmer-Lemeshow goodness of fit:
 
 # H0: The model is a good fit
 # H1: the model is not a good fit.
@@ -460,7 +504,7 @@ hoslem.test(x = as.numeric(HT$ht)-1,
 # Since p value>0.05,do not reject. hence it's a good fit.
 
 
-# McFadden's pseudo-R2:
+#n McFadden's pseudo-R2:
 mcfad <- 1-mod$deviance/mod$null.deviance
 mcfad
 
@@ -468,7 +512,7 @@ cat("\nThe model explains",round(mcfad,4)*100,"percent of the variation in the r
     \nIt's a poor fit.")
 
 
-# ROC/AUC curve:
+#op ROC/AUC curve:
 library(pROC)
 
 roc_obj <- roc(response = HT$ht,
@@ -486,10 +530,18 @@ cat("\nIf we randomly pick one positive case and one negative case then the mode
 
 
 
-# Average Marginal Effects:
+#q Average Marginal Effects:
 library(margins)
 ame <- margins(mod)
 summary(ame)
+
+
+
+
+
+
+
+
 cat("\nHolding all other variables constant, each one-unit increase in BMI increases the
 probability of hypertension by approximately 2.08 percentage points on average.
 After controlling for BMI and sleep, females have an average 3.91 percentage-point
@@ -497,7 +549,7 @@ lower probability of hypertension than males.
 Holding other variables constant, an additional hour of sleep decreases the
 probability of hypertension by approximately 0.29 percentage points on average.")
 
-
+.
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Type I censoring 
