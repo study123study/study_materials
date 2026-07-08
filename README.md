@@ -7,7 +7,7 @@ yl<-
 plot(x,yc, type="n", xlab="x",ylab="y",xlim=c(0,1000),ylim=c(0,1000))
 lines(x,yc,col="red")
 lines(x,yd, col="blue")
-lines(x,yl,col='yellow')
+lines(x,yl,col='green')
 #The corner points are: (0, 120), (160, 0), (120, 40)
 df<-data.frame(x=c(0,160,120),y=c(120,00,40))
 df$z<-100*df$x+120*df$y
