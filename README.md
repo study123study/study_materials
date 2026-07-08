@@ -387,6 +387,8 @@ Holding other variables constant, an additional hour of sleep decreases the
 probability of hypertension by approximately 0.29 percentage points on average.")
 
 
+#############################################
+
 #GRAPHICAL METHOD
 
 x<-seq(0,1000,1)
