@@ -1,1005 +1,444 @@
-#1a
-x<-seq(0,1000,1)
-yc<-
-yd<-
-yl<-
-  plot(x, yc, type="n",xlab="x",ylab="y",
-       xlim=c(0,1000), ylim=c(0,1000))
-lines(x,yc,col="red")
-lines(x,yd,col="blue")
-lines(x,yl,col="green")
+#ANALYZE
+treat<-factor(rep(paste0("Diet_",1:6),c(6,7,8,6,8,5)))
+d1<-c(179,186,200,182,187,197)
+d2<-c(169,188,179,189,186,168,182)
+d3<-c(182,191,243,214,213,202,180,214)
+d4<-c(202,220,226,245,241,225)
+d5<-c(210,214,220,192,188,189,190,224)
+d6<-c(155,176,159,161,165)
+diet<-c(d1,d2,d3,d4,d5,d6)
+data<-data.frame(Treatment=treat, Weight=diet)
+model<-aov(Weight~Treatment, data=data)
+summary(model)
+#3&5
+con<-matrix(c(0,0,1,0,-1,0,0,0,1,0,0,-1),2,6,byrow = T)
+rownames(con)<-c("Diet_3 vs Diet_5","Diet_3 vs Diet_6")
+library(gmodels)
+fit.contrast(model,"Treatment",con)
 
-df<-data.frame(x=c(  ),y=c(  ))
-df$z<-   *df$x+  *df$y
-opt<-which.max(df$z)
-xy<-df[opt,]
-xy
-#1b
-library(lpSolve)
-obj<-c(  )
-const.mat<-matrix(c(  ),nrow=3)
-const.dir<-c("<=","<=","<=")
-const.rhs<-c(  )
-sol<-lp("min",obj,const.mat,const.dir,const.rhs)
-cat("Z=",sol$objval,"\n")
-cat("(x1, x2,x3):",sol$sol[1:3],"\n")
-#2a
-library(lpSolve)
-M<-1e10
-obj<-c(3,2,0,0,0,M,M)
-const.mat<-matrix(c(),nrow = 3,byrow = TRUE)
-const.dir<-c("=","=","=")
-const.rhs<-c()
-sol<-lp("min",obj,const.mat,const.dir,const.rhs)
-cat("Z=",sol$objval,"\n")
-cat("Opt Values (x1, x2):",sol$sol[1:2],"\n")
+library(agricolae)
+LSD.test(model,"Treatment") $group
 
+#
 
-#p1
-library(lpSolve)
-obj1<-c(0,0,0,0,0,1,1)
-const1<-matrix(c(   ),nrow=3)
-dir1<-c("=","=","=")
-rhs1<-c(  )
-phase1<-lp(
-  direction="min",
-  objective.in=obj1,
-  const.mat=const1,
-  const.dir=dir1,
-  const.rhs=rhs1)
-cat("the optimal value =",phase1$objval,"\n")
+con1<-c(0,0,1,0,-1,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con1)
 
-cat("The values of the artificial variables are:","\n",
-    "a1=",phase1$solution[5]," and ","a2=",phase1$solution[6],"\n")
-#p2
-if (phase1$objval == 0) {
-  obj.phase2 <- c(3,2, 0, 0, 0, 0)
-  phase2 <- lp("min", obj.phase2, const.mat, const.dir, const.rhs)
-  cat("\nPhase 2 (original objective):\n")
-  cat("Optimal value of Z:", phase2$objval, "\n")
-  cat("Values of x1, x2:", phase2$solution[1:2], "\n")
-} else {
-  cat("Problem is infeasible (Phase 1 > 0)\n")
-}
-#2b
+library(gmodels)
+con2<-c(0,0,1,0,0,-1)
+fit.contrast(model,"Treatment",con2)
+#d
+library(agricolae)
+LSD.test(model,"Treatment")$group
 
-#NCWR and VAM
-cost <- matrix(c(),3,4,by=T)
-sup <- c()
-sum(sup)
-dem <- c()
-sum(dem)
+##
+#a significant difference between the treatments
+blck<-factor(rep(paste0("Block_",1:5),each=6))
+treat<-factor(rep(LETTERS[1:6],times=5))
+b1<-c(33.5,38.9,40.9,41.9,41.9,42.8)
+b2<-c(33,37.8,39.6,40.4,40.5,41.9)
+b3<-c(32,37,39,39.9,39.8,40.7)
+b4<-c(30,36,38.3,39.5,39.2,39.8)
+b5<-c(28.5,34.8,37.5,38.7,38.8,39.4)
+yld<-c(b1,b2,b3,b4,b5)
+data<-data.frame(Block=blck,Treatment=treat,Yield=yld)
+model<-aov(Yield~Block+Treatment, data=data)
+summary(model)
+#
+con<-c(0,0,0,1,-1,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con)
+#95%
+con<-c(0,1,-1,0,0,0)
+library(gmodels)
+fit.contrast(model,"Treatment",con, conf.int=0.95)
+#
+library(agricolae)
+duncan.test(model,"Treatment")$group
+LSD.test(model,"Treatment")$group
 
-NWCR <- function(s,d){
-  a <- matrix(0,length(s),length(d)); i <- j <- 1
-  while(i<=length(s) & j<=length(d)){
-    x <- min(s[i],d[j]); a[i,j] <- x
-    s[i] <- s[i]-x; d[j] <- d[j]-x
-    if(s[i]==0) i <- i+1 else j <- j+1
+#row,c,t
+ #a
+r1<-c(192,190,214,221)
+r2<-c(195,203,139,152)
+r3<-c(292,218,245,204)
+r4<-c(249,210,163,134)
+y<-c(r1,r2,r3,r4)
+row<-factor(rep(paste0("Cow-",1:4),each=4))
+col<-factor(rep(paste0("Period-",1:4),4))
+treat<-factor(paste0("Treat-",c(1:4,2,4,1,3,3,1,4,2,4,3,2,1)))
+data<-data.frame(Row=row,Column=col,Treatment=treat,y=y)
+model<-aov(y~Row+Column+Treatment, data=data)
+summary(model)
+#b
+library(agricolae)
+LSD.test(model,"Treatment")$group
+
+#hit 
+set.seed(125)
+hmi<-function(a,b,g,n){
+  x<-runif(n,a,b)
+  k<-g(x)
+  c<-max(k)
+  y<-runif(n,0,c)
+  v<-NULL
+  for(i in 1:n){
+    if(y[i]>k[i]){
+      v[i]<-0
+    }
+    else{
+      v[i]<-1
+    }
   }
-  a
+  nh<-sum(v)
+  i<-(c*(b-a)*nh)/n
+  cat("Hit or Miss Integration =",i)
 }
-NWCR(sup,dem)
+g<-function(x){
+  (sin(pi*x))^2
+}
+hmi(0,1,g,10000000)
 
-VAM <- function(c,s,d){
-  m <- nrow(c); n <- ncol(c); a <- matrix(0,m,n)
-  while(any(s>0)&any(d>0)){
-    p <- c(
-      sapply(1:m,\(i) if(s[i]){x<-sort(c[i,d>0]); if(length(x)>1)x[2]-x[1] else x}else 0),
-      sapply(1:n,\(j) if(d[j]){x<-sort(c[s>0,j]); if(length(x)>1)x[2]-x[1] else x}else 0)
-    )
-    k <- which.max(p)
-    if(k<=m){i<-k;j<-which(d>0)[which.min(c[i,d>0])]}
-    else{j<-k-m;i<-which(s>0)[which.min(c[s>0,j])]}
-    x <- min(s[i],d[j]); a[i,j] <- x
-    s[i] <- s[i]-x; d[j] <- d[j]-x
+#LCM
+rand<-function(seed,a,c,m,n){
+  vec<-NULL
+  for( i in 1:n){
+    z<-(a*seed+c)%%m
+    seed<-z
+    vec[i]<-z
   }
-  a
+  data.frame ("Random number"=vec,"Between 0 and 1"=vec/m)
 }
-VAM(cost,sup,dem)
+rand(52,21,53,100,5)
+#CLCM
+ran<-function(m,a,seed,n){
+  k<-length(m)
+  start<-rep(seed,k)
+  vec<-c()
+  for (i in 1:n){
+    z<-rep(0,k)
+    sum<-0
+    for(j in 1:k){
+      z[j]<-(a[j]*start[j])%%m[j]
+      start[j]<-z[j]
+      sum<-sum+((-1)^(j-1))*z[j]
+    }
+    x<-sum%%(m[1]-1)
+    if(x>0){
+      R<-x/m[1]
+    } else{(m[1]-1)/m[2]}
+    vec<-c(vec,R)
+  }
+  return(vec)
+}
+m<-c(2147483563,2147483399)
+a<-c(40014,40692)
+seed<-73
+n<-10
+ran(m,a,seed,n)
 
-#transportation
+#control v
+x<-function(f,g,rep,lo,up,control=T){
+  mu<-integrate(f,lo,up)$value
+  u<-runif(rep,lo,up)
+  A<-g(u)
+  B<-f(u)
+  corr<-cor(A,B)
+  a<--cov(A,B)/var(B)
+  if(!control){
+    T1<-A
+  }else{
+    T1<-A+a*(B-mu)
+  }
+  M<-(up-lo)*mean(T1)
+  if(!control){
+    list(MC=M)
+  }else{
+    list(correlation=corr,MC=M)
+  }
+}
+f<-function(x){exp(-.5)/(1+x^2)}
+g<-function(x){exp(-x)/(1+x^2)}
+x(f,g,100000,0,1,control = T)
 
-library(lpSolve)
-m<-matrix(c(),nrow=3,byrow=T)
-a<-c("<","<","<")
-b<-c()
-c<-c(">",">",">",">")
-d<-c()
-sol<-lp.transport(m,"min",a,b,c,d)
-sol
-sol$solution
 
-#######
-if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(
-  tidyverse,        
-  marginaleffects,  
-  car,            
-  ResourceSelection,
-  pROC,             
-  broom,          
-  ggplot2
-)
-setwd(" ")
-SP <- read.csv("Schizophrenia.csv",header = T, sep = ",")
 
-str(SP)
-view(SP)
+#Control Variates and Regression
+x<-function(f,g,rep,lo,up){
+  mu<-integrate(f,lo,up)$value
+  u<-runif(rep,lo,up)
+  L<-lm(g(u)~f(u))
+  a<-L$coeff[2]
+  theta.hat<-sum(L$coeff*c(1,mu))
+  c(theta.hat,summary(L)$sigma^2,summary(L)$r.squared)               
+}
+f<-function(x){exp(-.5)/(1+x^2)}
+g<-function(x){exp(-x)/(1+x^2)}
+x(f,g,10000000,0,1)
 
-SP <- within(SP,{
-  cen <- factor(Censor, labels = c("Censor","Death"))
-  marital <- factor(Marital, labels = c("Single","Married","Alone again"))
-  sex <- factor(Gender, labels = c("Male","Female"))
-})
+#exp
+rexpon<-function(size,lambda){ 
+  X<-rep(0,size) 
+  for(i in 1:size){
+    U<-runif(1)
+    X[i]<--(1/lambda)*(log(U))
+  }
+  X
+}
+set.seed(100)
+x<- rexpon(10000,2)
+x
+mean(x)
+var(x)
+sd(x)
 
-str(SP)
-# a Number of censored observations and events for all patients
-table(SP$cen)
-prop.table(table(SP$cen))
+plot
+library(MASS)
+win.graph(6,3,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+truehist(x)
+z<- (mean(x)-2)/(sd(x)/sqrt(10000))
+#gamma
+rgam<-function(size, shape, rate){ 
+  x<-rep(0,size) 
+  for ( i in 1:size){
+    x[i]<-(-1/rate)*sum(log(runif(shape)))
+  }
+  x
+}
+set.seed(100)
+x<- rgam(10000,3,2)
+library(MASS)
+win.graph(6,3,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+truehist(x)
+ test the hypothesis that
+z<- (mean(x)-(3/2))/sd(x)/(sqrt(10000))
+#Box M
+rnormal<-function(size, Mean, Sd){
+  L<-size/2
+  x<-rep(0,size)
+  for(i in 1:L){
+    u1<-runif(1)
+    u2<-runif(1)
+    x[2*i-1]<-Mean+Sd*sqrt(-2*log(u1))*cos(2*pi*u2)
+    x[2*i]<-Mean+Sd*sqrt(-2*log(u1))*sin(2*pi*u2)
+  }
+  x
+}
+set.seed(100)
+x<- rnormal(10000,5,2)
+library(MASS)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+truehist(x)
+# Ho:mu=5
+mean(x)
+sd(x)
+z<- (mean(x)-5)/(sd(x)/sqrt(10000))
+qnorm(0.005)
+#Ho:sigma=4
+sigma<-4
+n<-10000
+chi<-(n-1)*var(x)/sigma
+qchisq(0.01,n-1)
+#chi
+rchisquare<-function(size, df){
+  x<-rep(0,size)
+  for ( i in 1:size){
+    x[i]<-(-2)*sum(log(runif(df/2)))
+  }
+  x
+}
+set.seed(100)
+x<- rchisquare (10000,10)
+library(MASS)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+truehist(x)
+lines (density(x))
 
-#(by marital status): 
-table(SP$marital,SP$cen)
-prop.table(table(SP$marital,SP$cen))
-
-# (by gender): 
-table(SP$sex,SP$cen)
-prop.table(table(SP$sex,SP$cen))
-#b km plot
-library(survival)
-names(SP)
-sp_survival <- survfit(Surv(Time, Censor)~1,
-                       data = SP, type = "kaplan-meier",
-                       conf.type = "log-log")
-plot(sp_survival, xlab = "Days of follow-up", ylab="Survival Probability", main= "Overall
-survival curve")
+#binom
+rbino<-function(size,n,p){ 
+  X<-rep(0, size)
+  for(i in 1:size){
+    x<-0
+    sum<-choose(n,x)*(p^x)*(1-p)^(n-x)
+    u<-runif(1)
+    while(u>sum){
+      x<-x+1
+      sum<-sum+choose(n,x)*(p^x)*(1-p)^(n-x)
+    }
+    X[i]<-x
+  }
+  X
+}
+set.seed(100)
+n<-7
+p<-0.6
+N<-10000
+x<- rbino(N,n,p)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+freq<-table(x)
+barplot(freq)
+plot(freq)
+mu<-n*p
+phat<-mean(x)/n
+z<-(mean(x)-mu)/sqrt(n*phat*(1-phat)/N)
 
 #or
-library(survminer)
-ggsurvplot(sp_survival,
-           data = SP,
-           risk.table = TRUE,
-           pval = FALSE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
+phat<- mean(x)/n
+z<-(mean(x)/n-p)/sqrt(phat*(1-phat)/(n*N))
 
-# c median s(t)
-print(sp_survival)
-# 95% CI
-summary(sp_survival, time = c(6*30,18*30,36*30))
+#rgeom
 
-#d 95% CI by ms
-names(SP)
-sp_survival_mar <- survfit(Surv(Time,Censor)~marital, data = SP, type = "kaplan-meier", conf.type = "log-log")
-
-sp_survival_mar 
-
-#plot km by ms
-ggsurvplot(sp_survival_mar,
-           data = SP,
-           risk.table = TRUE,
-           pval = TRUE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
-cat("\nSince p-value < 0.0001, we conclude that highly significant differences in survival
-times among the three marital status groups. Patients who are 'Alone Again' have the poorest survival (median 539 days), while married patients have the best
-survival (median 1310 days).") 
-
-
-
-
-
-# e The median survival time (with 95% CI) by gender
-names(SP)
-sp_survival_sex <- survfit(Surv(Time,Censor)~sex, data = SP, type = "kaplan-meier", conf.type = "log-log")
-
-sp_survival_sex 
-cat("Females have a substantially lower median survival time compared to males,
-indicating that females in this cohort have poorer survival outcomes.")
-
-# Kaplan-Meier estimate of the survival curve by gender
-ggsurvplot(sp_survival_sex,
-           data = SP,
-           risk.table = TRUE,
-           pval = TRUE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
-
-
-
-
-cat("The Kaplan-Meier curves show that females have consistently lower survival probabilities than males throughout the follow-up period, with a log-rank p-value <
-0.0001 confirming a statistically significant difference")
-
-
-
-
-
-#f Log-rank test for group comparison
-logrank_test <- survdiff(
-  Surv(Time, Censor) ~ marital,
-  data = SP
-)
-
-print(logrank_test)
-
-#4
-
-#HT
-setwd("G:/STATISTICS/4rth Year/2nd Semester/lab")
-HT <- read.csv("Hypertension_Lab.csv",header = T, sep = ",")
-
-#a
-HT$age<-HT$ID/HT$bmi
-view(HT)
-#c factorize
-HT <- within(HT,{
-  bmi_cat <- factor(ifelse(bmi<25, "Normal", 
-                           ifelse(bmi<30, "Overweight", "Obese")),
-                    levels = c("Normal","Overweight", "Obese"))
-  sex <- factor(Gender, labels = c("Male","Female"))
-  ht <- factor(hypert, labels = c("No", "Yes"))
-})
-
-str(HT)
-
-
-#d Table and proportion table of gender:
-t <- table(HT$sex, HT$ht)
-t
-
-round(prop.table(t),4)
-
-
-#f Association between the hypertension and bmi category:
-t2 <- table(HT$bmi_cat, HT$ht)
-
-chisq.test(t2)                                                                    # Since p-value = 1.011e-14 <0.001, there is a significant association.
-
-# Highest probability of hypertension
-
-round(prop.table(t2,2),4)
-cat("Obese bmi category has the highest probability of hypertension.")
-
-#g Fit a logistic regression model to predict hypertension, using bmi, sleep, gender:
-
-mod <- glm(ht ~ bmi + sex + sleep, data = HT, family = binomial(link = "logit"))
-summary(mod)
-
-
-#h,i
-library(broom)
-tidy(mod, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
-
-Holding sleep duration and gender constant, each one-unit increase in BMI
-increases the odds of hypertension by approximately 11%.
-After adjusting for BMI and gender, each additional hour of sleep decreases the
-odds of hypertension by about 1.4%.
-
-
-#k Calculate the sensitivity, recall, specificity, PPV, precision, NPV, F1 score and accuracy level of the test and interpret:
-pp <- predict(mod, type = "response")
-pv <- factor(ifelse(pp>0.5, 1, 0), labels = c("No", "Yes"))
-
-ct <- table(Actual = HT$ht,
-            Predicted = pv)
-ct
-
-TN <- ct[1,1]
-FP <- ct[1,2]
-FN <- ct[2,1]
-TP <- ct[2,2]
-
-calc_mat <- function(TP,TN,FP,FN){
-  Total <- TP+TN+FP+FN
-  Sensitivity <- TP/(TP+FN)
-  Specificity <- TN/(FP+TN)
-  PPV <- TP/(TP+FP)
-  NPV <- TN/(TN+FN)
-  Accuracy <- (TP+TN)/Total
-  
-  Recall <- Sensitivity
-  Precision <- PPV
-  F1 <- 2*Recall*Precision/(Recall+Precision)
-  
-  t(data.frame(Total,
-               Sensitivity,
-               Specificity,
-               PPV,
-               NPV,
-               Accuracy,
-               Recall,
-               Precision,
-               F1))
+rgeometric<-function(size,prob){
+  x<-rep(0,size)
+  for(i in 1:size){
+    u<-runif(1,0,1)
+    x[i]<-floor(log(u)/log(1-prob))
+  }
+  x
 }
+set.seed(100)
+x<- rgeometric (10000,0.25)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+freq<-table(x)
+barplot(freq)
+plot(freq,type="h")
 
-calc_mat(TP,TN,FP,FN)
-
-
-
-
-
-
-
-
-
-
-
-
-cat("\nSensitivity (24.79%) / Recall: Only 24.79% of hypertensive individuals were correctly identified.
-Specificity (93.20%): 93.20% of non-hypertensive individuals were correctly identified.
-PPV / Precision (64.52%): Among those predicted to have hypertension, 64.52% actually had hypertension.
-NPV (71.29%): Among those predicted to be non-hypertensive, 71.29% were truly non-hypertensive.
-F1 Score (35.82%): Indicates poor overall performance in detecting hypertension.
-Accuracy (70.43%): The model correctly classified 70.43% of individuals.")
-
-#p ROC/AUC curve:
-library(pROC)
-
-roc_obj <- roc(response = HT$ht,
-               predict = fitted(mod),
-               levels = c("No","Yes"))
-auc(roc_obj)
-
-
-
-
-
-
-
-
-cat("\nApproximately 68.5% probability that the model assigns a higher predicted
-probability of hypertension to a randomly selected hypertensive individual than to
-a randomly selected non-hypertensive individual.")
-
-plot(roc_obj, print.auc=TRUE)
-
-
-
-
-
-
-cat("\nIf we randomly pick one positive case and one negative case then the model will assign higher probablity to 
-    the positive case about",round(auc(roc_obj),4)*100,"percent of the time.")
-
-
-
-#q Average Marginal Effects:
-library(margins)
-ame <- margins(mod)
-summary(ame)
-
-
-
-
-
-
-
-
-cat("\nHolding all other variables constant, each one-unit increase in BMI increases the
-probability of hypertension by approximately 2.08 percentage points on average.
-After controlling for BMI and sleep, females have an average 3.91 percentage-point
-lower probability of hypertension than males.
-Holding other variables constant, an additional hour of sleep decreases the
-probability of hypertension by approximately 0.29 percentage points on average.")
-
-
-#############################################
-
-#GRAPHICAL METHOD
-
-x<-seq(0,1000,1)
-yc<-
-yd<-
-yl<-
-plot(x,yc, type="n", xlab="x",ylab="y",xlim=c(0,1000),ylim=c(0,1000))
-lines(x,yc,col="red")
-lines(x,yd, col="blue")
-lines(x,yl,col='green')
-#The corner points are: (0, 120), (160, 0), (120, 40)
-df<-data.frame(x=c(0,160,120),y=c(120,00,40))
-df$z<-100*df$x+120*df$y
-opt<-which.max(df$z)
-xy<-df[opt,]
-xy
-
-
-#2 simplex method
-
-library(lpSolve)
-obj<-c()
-const.mat<-matrix(c(),nrow = 3,byrow = TRUE)
-const.dir<-c("<=","<=","<=")
-const.rhs<-c()
-sol<-lp("min",obj,const.mat,const.dir,const.rhs)
-cat("Z=",sol$objval,"\n")
-cat("(x1, x2,x3):",sol$sol[1:3],"\n")
-
-
-# dual simplex method 
-cat("\nTo solve the given LPP by dual simplex method we have to maximize the
-objective function and have to change the constraint into less than or equal.")
-library(lpSolve)
-obj<-c()
-const.mat<-matrix(c(),nrow = 2,byrow = TRUE)
-const.dir<-c("<=","<=")
-const.rhs<-c(-2,-4)
-sol<-lp("max",obj,const.mat,const.dir,const.rhs)
-cat("Z=",sol$objval,"\n")
-cat("(x1, x2):",sol$sol[1:2],"\n")
-
-#Big-M method
-cat("\nTo solve the given LPP by Big-M method, we write the given LPP introducing slack, surplus and artificial variables")
-
-
-library(lpSolve)
-M<-1e10
-obj<-c(3,2,0,0,0,M,M)
-const.mat<-matrix(c(2,1,0,-1,0,1,0,-3,2,1,0,0,0,0,1,1,0,0,-1,0,1),nrow = 3,byrow = TRUE)
-const.dir<-c("=","=","=")
-const.rhs<-c(10,6,6)
-sol<-lp("min",obj,const.mat,const.dir,const.rhs)
-cat("Z=",sol$objval,"\n")
-cat("Opt Values (x1, x2):",sol$sol[1:2],"\n")
-
-# two-phase method()
-#p1
-library(lpSolve)
-obj1<-c(0,0,0,0,1,1)
-const1<-matrix(c(2,1,1,1,3,1,1,0,0,0,-1,0,0,1,0,0,0,1),nrow=3)
-dir1<-c("=","=","=")
-rhs1<-c(16,36,10)
-phase1<-lp(
-  direction="min",
-  objective.in=obj1,
-  const.mat=const1,
-  const.dir=dir1,
-  const.rhs=rhs1)
-cat("the optimal value =",phase1$objval,"\n")
-
-cat("The values of the artificial variables are:","\n",
-    "a1=",phase1$solution[5]," and ","a2=",phase1$solution[6],"\n")
-#p2
-if (phase1$objval == 0) {
-  obj.phase2 <- c(2, 3, 0, 0, 0, 0)
-  phase2 <- lp("min", obj.phase2, const.mat, const.dir, const.rhs)
-  cat("\nPhase 2 (original objective):\n")
-  cat("Optimal value of Z:", phase2$objval, "\n")
-  cat("Values of x1, x2:", phase2$solution[1:2], "\n")
-} else {
-  cat("Problem is infeasible (Phase 1 > 0)\n")
+#pois
+rPoisson<-function(size,lambda){ 
+  y<-rep(0, size) 
+  for(i in 1:size){
+    x<-0
+    sum<-(exp(-lambda)*(lambda)^x)/factorial(x)
+    u<-runif(1)
+    while(u>sum){
+      x<-x+1
+      sum<-sum+(exp(-lambda)*(lambda)^x)/factorial(x)
+    }
+    y[i]<-x
+  }
+  y
 }
+set.seed(100)
+N<-10000
+lambda<-2
+x<- rPoisson (N, lambda)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+freq<-table(x)
+barplot(freq)
+plot(freq,type="h")
+lambhat<-mean(x)
+z<-( lambhat-lambda)/sqrt(lambhat/N)
 
-
-#NCWR and VAM
-cost <- matrix(c(4,8,8,0,16,24,16,0,8,16,24,0),3,4,by=T)
-sup <- c(76,82,77)
-dem <- c(72,102,41,20)
-
-# NWCR
-NWCR <- function(s,d){
-  a <- matrix(0,length(s),length(d)); i <- j <- 1
-  while(i<=length(s) & j<=length(d)){
-    x <- min(s[i],d[j]); a[i,j] <- x
-    s[i] <- s[i]-x; d[j] <- d[j]-x
-    if(s[i]==0) i <- i+1 else j <- j+1
-  }
-  a
+#marsaglia
+rmarsag<-function(size, Mean, Sd){
+  x<-rep(0,size)
+  L<-size/2
+  for(i in 1:L){
+    n<-1
+    while(n==1){
+      u1<-runif(1)
+      u2<-runif(1)
+      w1<-(2*u1)-1
+      w2<-(2*u2)-1
+      w<-w1^2+w2^2
+      if(w<1){
+        x[2*i-1]<-Mean+Sd*sqrt(-2*log(w)/w)*(w1)
+        x[2*i]<-Mean+Sd*sqrt(-2*log(w)/w)*(w2)
+        n<-0
+      }
+    }
+  }
+  x
 }
-NWCR(sup,dem)
-VAM <- function(c,s,d){
-  m <- nrow(c); n <- ncol(c); a <- matrix(0,m,n)
-  while(any(s>0)&any(d>0)){
-    p <- c(
-      sapply(1:m,\(i) if(s[i]){x<-sort(c[i,d>0]); if(length(x)>1)x[2]-x[1] else x}else 0),
-      sapply(1:n,\(j) if(d[j]){x<-sort(c[s>0,j]); if(length(x)>1)x[2]-x[1] else x}else 0)
-    )
-    k <- which.max(p)
-    if(k<=m){i<-k;j<-which(d>0)[which.min(c[i,d>0])]}
-    else{j<-k-m;i<-which(s>0)[which.min(c[s>0,j])]}
-    x <- min(s[i],d[j]); a[i,j] <- x
-    s[i] <- s[i]-x; d[j] <- d[j]-x
-  }
-  a
+set.seed(100)
+x<- rmarsag (10000,3,4)
+library(MASS)
+win.graph(6,2.5,8)
+par(mfrow=c(1,2))
+par(mar=c(4,4,1,1))
+plot(density(x))
+truehist(x)
+lines (density(x))
+
+#Gibs
+set.seed(3)
+rgibbs<-function(x0, y0, iter){
+  x<-matrix(x0, iter)
+  y<-matrix(y0, iter)
+  for( i in 2:iter){
+    u<-runif(1)
+    x[i]<-sqrt(u*(1-x[i])^2)
+    u<-runif(1)
+    y[i]<-sqrt(u*(1-x[i])^2)
+  }
+  list(x=x, y=y)
 }
-VAM(cost,sup,dem)
-
-
-
-#transportation
-
-library(lpSolve)
-m<-matrix(c(),nrow=3,byrow=T)
-a<-c("<","<","<")
-b<-c()
-c<-c(">",">",">",">")
-d<-c()
-sol<-lp.transport(m,"min",a,b,c,d)
-sol
-sol$solution
-
-
-#####bio#####
-
-if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(
-  tidyverse,        
-  marginaleffects,  
-  car,            
-  ResourceSelection,
-  pROC,             
-  broom,          
-  ggplot2
-)
-setwd("G:/STATISTICS/4rth Year/2nd Semester/lab")
-SP <- read.csv("Schizophrenia.csv",header = T, sep = ",")
-
-str(SP)
-view(SP)
-
-SP <- within(SP,{
-  cen <- factor(Censor, labels = c("Censor","Death"))
-  marital <- factor(Marital, labels = c("Single","Married","Alone again"))
-  sex <- factor(Gender, labels = c("Male","Female"))
-})
-
-str(SP)
-# a Number of censored observations and events for all patients
-table(SP$cen)
-prop.table(table(SP$cen))
-
-#(by marital status): 
-table(SP$marital,SP$cen)
-prop.table(table(SP$marital,SP$cen))
-cat("By marital status the number of censors is 50, 35 and 32 for Single, Married and
-Alone again")
-
-
-
-
-
-# (by gender): 
-table(SP$sex,SP$cen)
-prop.table(table(SP$sex,SP$cen))
-#b km plot
-library(survival)
-names(SP)
-sp_survival <- survfit(Surv(Time, Censor)~1,
-                       data = SP, type = "kaplan-meier",
-                       conf.type = "log-log")
-plot(sp_survival, xlab = "Days of follow-up", ylab="Survival Probability", main= "Overall
-survival curve")
-
-#or
-library(survminer)
-ggsurvplot(sp_survival,
-           data = SP,
-           risk.table = TRUE,
-           pval = FALSE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
-
-# c median s(t)
-print(sp_survival)
-# 95% CI
-summary(sp_survival, time = c(6*30,18*30,36*30))
-
-#d 95% CI by marital status
-names(SP)
-sp_survival_mar <- survfit(Surv(Time,Censor)~marital, data = SP, type = "kaplan-meier", conf.type = "log-log")
-
-sp_survival_mar 
-
-# km marital status
-ggsurvplot(sp_survival_mar,
-           data = SP,
-           risk.table = TRUE,
-           pval = TRUE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
-cat("\nSince p-value < 0.0001, we conclude that highly significant differences in survival
-times among the three marital status groups. Patients who are 'Alone Again' have the poorest survival (median 539 days), while married patients have the best
-survival (median 1310 days).") 
-
-
-
-
-
-# e The median survival time (with 95% CI) by gender
-names(SP)
-sp_survival_sex <- survfit(Surv(Time,Censor)~sex, data = SP, type = "kaplan-meier", conf.type = "log-log")
-
-sp_survival_sex 
-cat("Females have a substantially lower median survival time compared to males,
-indicating that females in this cohort have poorer survival outcomes.")
-
-# Kaplan-Meier estimate of the survival curve by gender
-ggsurvplot(sp_survival_sex,
-           data = SP,
-           risk.table = TRUE,
-           pval = TRUE,
-           surv.median.line = "hv",
-           conf.int = FALSE,
-           xlab = "Days to follow-up")
-
-
-
-
-cat("The Kaplan-Meier curves show that females have consistently lower survival probabilities than males throughout the follow-up period, with a log-rank p-value <
-0.0001 confirming a statistically significant difference")
-
-
-
-
-
-#f Log-rank test for group comparison
-logrank_test <- survdiff(
-  Surv(Time, Censor) ~ marital,
-  data = SP
-)
-
-print(logrank_test)
-
-
-#f Comparison with Nelson-Aalen estimate at timepoints 90, 180, 270, 365 days
-
-
-sp_km <-survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", 
-                conf.type = "log-log")              # Kaplan-Meier
-sp_na <-survfit(Surv(Time,Censor)~1, data = SP, 
-                type = "fh", conf.type = "log-log") # Nelson Aalen / Flemming Harington
-
-sum_km <- summary(sp_km, times = c(90, 180, 270, 365))
-sum_na <- summary(sp_na, times = c(90, 180, 270, 365))
-
-data.frame(
-  Time = sum_km$time,
-  At_risk = sum_km$n.risk,
-   Events = sum_km$n.event,
-  Censor = sum_km$n.censor,
-  Skm =sum_km$surv,
-  km_lower = sum_km$lower,
-  km_upper = sum_km$upper,
-  Sna = sum_na$surv,
-  na_lower = sum_na$lower,
-  na_upper = sum_na$upper
-)
-
-
-# Confidence interval types: (simple, log, clog-log)
-sp_surv_plain <- survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", conf.type = "plain")   # simple
-summary(sp_surv_plain)
-
-sp_surv_log <- survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", conf.type = "log")   # log
-summary(sp_surv_log)
-
-sp_surv <- survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", conf.type = "log-log")   # clog-log
-summary(sp_surv)
-
-# Taking variance from std error
-sp_surv <- survfit(Surv(Time,Censor)~1, data = SP, type = "kaplan-meier", conf.type = "log-log")
-sum <- summary(sp_surv,  times = c(90, 180, 270, 365))
-
-data.frame(
-  time = sum$time,
-  nj = sum$n.risk,
-  dj = sum$n.event,
-  cj = sum$n.censor,
-  S = sum$surv,
-  Var = sum$std.err^2
-)
-
-
-#HT
-setwd("G:/STATISTICS/4rth Year/2nd Semester/lab")
-HT <- read.csv("Hypertension_Lab.csv",header = T, sep = ",")
-
-#a
-HT$age<-HT$ID/HT$bmi
-
-#c factorize
-HT <- within(HT,{
-  bmi_cat <- factor(ifelse(bmi<25, "Normal", 
-                           ifelse(bmi<30, "Overweight", "Obese")),
-                    levels = c("Normal","Overweight", "Obese"))
-  sex <- factor(Gender, labels = c("Male","Female"))
-  ht <- factor(hypert, labels = c("No", "Yes"))
-})
-
-str(HT)
-
-
-#d Table and proportion table of gender:
-t <- table(HT$sex, HT$ht)
-t
-
-round(prop.table(t),4)
-
-
-#f Association between the hypertension and bmi category:
-t2 <- table(HT$bmi_cat, HT$ht)
-
-chisq.test(t2)                                                                    # Since p-value = 1.011e-14 <0.001, there is a significant association.
-
-# Highest probability of hypertension
-
-round(prop.table(t2,2),4)*100 
-cat("Obese bmi category has the highest probability of hypertension.")
-
-#g Fit a logistic regression model to predict hypertension, using bmi, sleep, gender:
-
-mod <- glm(ht ~ bmi + sex + sleep, data = HT, family = binomial(link = "logit"))
-summary(mod)
-
-
-
-
-
-
-
-
-#h,i
-library(broom)
-tidy(mod, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
-
-Holding sleep duration and gender constant, each one-unit increase in BMI
-increases the odds of hypertension by approximately 11%.
-After adjusting for BMI and gender, each additional hour of sleep decreases the
-odds of hypertension by about 1.4%.
-
-
-#k Calculate the sensitivity, recall, specificity, PPV, precision, NPV, F1 score and accuracy level of the test and interpret:
-pp <- predict(mod, type = "response")
-pv <- factor(ifelse(pp>0.5, 1, 0), labels = c("No", "Yes"))
-
-ct <- table(Actual = HT$ht,
-            Predicted = pv)
-ct
-
-TN <- ct[1,1]
-FP <- ct[1,2]
-FN <- ct[2,1]
-TP <- ct[2,2]
-
-calc_mat <- function(TP,TN,FP,FN){
-  Total <- TP+TN+FP+FN
-  Sensitivity <- TP/(TP+FN)
-  Specificity <- TN/(FP+TN)
-  PPV <- TP/(TP+FP)
-  NPV <- TN/(TN+FN)
-  Accuracy <- (TP+TN)/Total
-  
-  Recall <- Sensitivity
-  Precision <- PPV
-  F1 <- 2*Recall*Precision/(Recall+Precision)
-  
-  t(data.frame(Total,
-               Sensitivity,
-               Specificity,
-               PPV,
-               NPV,
-               Accuracy,
-               Recall,
-               Precision,
-               F1))
+r<-rgibbs(0.4,0.4,2000)
+M<-cbind(x<-r$x,y<-r$y)
+apply(M,2,mean)
+cout("the estimates agree with their corresponding expected values")
+#simulation of a poisson process
+set.seed(3)
+t<-0
+ET<-NULL 
+NF<-NULL
+while(t<=2){ 
+  u<-runif(1) 
+  t1<-t-log(u)/5 
+  if(t1>2){break} 
+  ET<-c(ET,t1)
+  NF<-c(NF,19+ceiling(21*u)) 
+  t<-t+t1 
 }
+data.frame("Time"=ET, "Number of Fans"=NF)
 
-calc_mat(TP,TN,FP,FN)
+From 0 to 0.3567 hour, 23 fans arrived (1st bus).
+From 0.3567 to 0.3995 hour, 36 fans arrived (2nd bus)
+##### 
 
 
+lambda <- 3.8
 
+# (a)
+dpois(4, lambda)          # P(X = 4)
+ppois(3, lambda)          # P(X < 4)
+ppois(4, lambda)          # P(X ≤ 4)
+1 - ppois(4, lambda)      # P(X > 4)
+1 - ppois(3, lambda)      # P(X ≥ 4)
 
+# (b)
+ppois(7, lambda) - ppois(3, lambda)   # P(3 < X < 8)
+ppois(8, lambda) - ppois(3, lambda)   # P(4 ≤ X ≤ 8)
+ppois(7, lambda) - ppois(4, lambda)   # P(4 ≤ X < 8)
+ppois(8, lambda) - ppois(4, lambda)   # P(4 < X ≤ 8)
 
+# (c)
+dpois(3, lambda) + dpois(4, lambda)   # P(X = 3 or X = 4)
 
+# (d)
+qpois(0.5, lambda)                    # Find 'a' such that P(X ≤ a) ≥ 0.5
 
-
-
-
-
-
-cat("\nSensitivity (24.79%) / Recall: Only 24.79% of hypertensive individuals were correctly identified.
-Specificity (93.20%): 93.20% of non-hypertensive individuals were correctly identified.
-PPV / Precision (64.52%): Among those predicted to have hypertension, 64.52% actually had hypertension.
-NPV (71.29%): Among those predicted to be non-hypertensive, 71.29% were truly non-hypertensive.
-F1 Score (35.82%): Indicates poor overall performance in detecting hypertension.
-Accuracy (70.43%): The model correctly classified 70.43% of individuals.")
-
-#op ROC/AUC curve:
-library(pROC)
-
-roc_obj <- roc(response = HT$ht,
-               predict = fitted(mod),
-               levels = c("No","Yes"))
-auc(roc_obj)
-
-
-
-
-
-
-
-
-cat("\nApproximately 68.5% probability that the model assigns a higher predicted
-probability of hypertension to a randomly selected hypertensive individual than to
-a randomly selected non-hypertensive individual.")
-
-plot(roc_obj, print.auc=TRUE)
-
-
-
-
-
-
-cat("\nIf we randomly pick one positive case and one negative case then the model will assign higher probablity to 
-    the positive case about",round(auc(roc_obj),4)*100,"percent of the time.")
-
-
-
-#q Average Marginal Effects:
-library(margins)
-ame <- margins(mod)
-summary(ame)
-
-
-
-
-
-
-
-
-cat("\nHolding all other variables constant, each one-unit increase in BMI increases the
-probability of hypertension by approximately 2.08 percentage points on average.
-After controlling for BMI and sleep, females have an average 3.91 percentage-point
-lower probability of hypertension than males.
-Holding other variables constant, an additional hour of sleep decreases the
-probability of hypertension by approximately 0.29 percentage points on average.")
-
-
-
-
-#################################
-sum(is.na(HT))
-# 2)b Re-coding variables:
-str(HT)
-at <- ifelse(HT$bmi < 25, "Normal",
-             ifelse(HT$bmi < 30, "Overweight","Obese"))
-#e Risk of hypertension for male:
-t
-
-risk <- t[1,2]/(t[1,1]+t[1,2])
-risk 
-
-# 95% CI for the risk:
-
-risk+c(-1,1)*qnorm(0.975)*sqrt(risk*(1-risk)/(t[1,1]+t[1,2]))
-
-
-#j Deviance of the model:
-cat("\nNull Devience:",mod$null.deviance,
-    "\nResidual Devience:", mod$deviance)
-#l Multicollinearity by variance inflation factor
-library(car)
-vif(mod)
-
-#m Hosmer-Lemeshow goodness of fit:
-
-# H0: The model is a good fit
-# H1: the model is not a good fit.
-
-library(ResourceSelection)
-hoslem.test(x = as.numeric(HT$ht)-1,
-            y = fitted(mod),
-            g=10)
-
-# Since p value>0.05,do not reject. hence it's a good fit.
-
-
-#n McFadden's pseudo-R2:
-mcfad <- 1-mod$deviance/mod$null.deviance
-mcfad
-
-cat("\nThe model explains",round(mcfad,4)*100,"percent of the variation in the response variable.
-    \nIt's a poor fit.")
-
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Type I censoring 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-lung <- survival::lung 
-
-lung$status2 <- ifelse(lung$status==2,1,0)
-n <- nrow(lung)
-
-names(lung)
-
-L <- 365
-
-ti <- pmin(lung$time,L)
-si <- as.numeric(lung$status2 == 1 & lung$time <= L)
-
-r <- sum(si)
-T <- sum(ti)
-
-cat("\nUnder type I censoring\n Censoring time:",L,"\n",
-    "Number of events:",r,"|Number of censor:",n-r)
-
-lam_hat <- r/T
-mu_hat <-  1/lam_hat
-
-lam_hat
-mu_hat
-
-sd_lam <- lam_hat/sqrt(r)
-round(lam_hat+c(-1,1)*1.96*sd_lam,4)
-
-sd_mu <- mu_hat/sqrt(r)
-round(mu_hat+c(-1,1)*1.96*sd_mu,4)
-
-qchisq(0.025,2*r)/(2*T)
-qchisq(0.975,2*r)/(2*T)
-
-
-
-
-time1 <- c(1,1,3,5,5,14,17,17,23,23)
-time2 <- c(2,2,6,9,9,10,11,12,13,13,13,14,17,18,19,21,21,23,24,24) 
-
-event <- c(rep(1,10),rep(0,20))
-time <- c(time1, time2)
-
-df <- data.frame(
-  Event = event,
-  Time = time
-)
-
-df
-
-mod <- survfit(Surv(Time, Event)~1, data = df, type = "kaplan-meier", conf.type = "log-log")
-
-mod
-summary(mod)
-
-summary(mod, times = c(16,21))
-
-ggsurvplot(mod,
-           data = df,
-           risk.table = TRUE,
-           pval = FALSE,
-           xlab = "days to follow-up",
-           conf.int = FALSE)
-
-
-
-
-time1 <- c(1,1,1,1,1,1,2,2,2,2,2,3,3,3,4,4,4,6,6,9,9,9,10,13,16)
-time2 <- c(2.1,3.1,4,7,7,8,8,9,9,9,11,24,24)
-
-time <- c(time1, time2)
-event <- c(rep(1,25),rep(0,13))
-
-df <- data.frame(time, event)
-
-df
-str(df)
-
-mod <- survfit(Surv(time,event)~1,df,type="kaplan-meier",conf.type="log-log")
-mod
-summary(mod)
-
-summary(mod)$n.censor
-
-
-mod <- survfit(Surv(time,event)~1,df,type="kaplan-meier",conf.type="log-log")
-mod
-summary(mod)
-
-summary(mod)$n.censor
-
+# (e)
+set.seed(123)
+y <- rpois(70, lambda)                # Random sample of size 70
+y
